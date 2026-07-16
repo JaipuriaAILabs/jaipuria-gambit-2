@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getSessionUser } from "@/lib/auth";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 
-const display = Space_Grotesk({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700", "800"] });
 const body = Inter({ subsets: ["latin"], variable: "--font-body" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
@@ -15,10 +15,9 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08080b",
+  themeColor: "#070709",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 // Co-locate serverless functions with the Mumbai (ap-south-1) database.

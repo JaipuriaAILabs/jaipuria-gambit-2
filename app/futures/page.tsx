@@ -15,11 +15,14 @@ export default async function FuturesPage() {
   return (
     <div className="wrap rise" style={{ paddingTop: 14 }}>
       <AutoRefresh />
-      <div style={{ marginBottom: 14 }}>
-        <h1 className="h-hero" style={{ fontSize: 26 }}>♛ Champion futures</h1>
-        <p style={{ color: "var(--color-muted)", fontSize: 14, marginTop: 4 }}>
-          One pool. Back who lifts the trophy. Money on knocked-out players stays in the pot — so the
-          earlier and gutsier your call, the fatter the payout. Pool: <b className="num" style={{ color: "var(--color-gold)" }}>{fmt(totalPool)}</b> 🪙
+      <div style={{ marginBottom: 16, position: "relative" }}>
+        <span className="watermark" aria-hidden>♛</span>
+        <div className="eyebrow" style={{ marginBottom: 6 }}>champion futures</div>
+        <h1 className="h-hero" style={{ fontSize: 28 }}>Who lifts<br />the trophy?</h1>
+        <p style={{ color: "var(--color-muted)", fontSize: 13.5, marginTop: 8, maxWidth: 430 }}>
+          One pool. Money on knocked-out players stays in the pot — the earlier and gutsier
+          your call, the fatter the payout. Pool so far:{" "}
+          <b className="num" style={{ color: "var(--color-gold)" }}>{fmt(totalPool)}</b>
         </p>
       </div>
 

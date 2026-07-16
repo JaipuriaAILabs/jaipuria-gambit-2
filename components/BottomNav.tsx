@@ -41,6 +41,8 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
                 textDecoration: "none",
                 color: active ? "var(--color-purple)" : "var(--color-faint)",
                 transition: "color 0.15s",
+                position: "relative",
+                boxShadow: active ? "inset 0 2px 0 var(--color-purple)" : "none",
               }}
             >
               <span style={{ fontSize: 20, lineHeight: 1 }}>{it.glyph}</span>

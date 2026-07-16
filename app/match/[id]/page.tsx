@@ -24,54 +24,113 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   const winP2 = m.status === "settled" && m.winner_player_id === m.p2_player_id;
   const bettable = m.status === "open" && m.p1_name && m.p2_name;
 
-  const PlayerBig = ({ name, pool, odds, win, lose }: { name: string | null; pool: number; odds: number | null; win: boolean; lose: boolean }) => (
-    <div style={{ flex: 1, textAlign: "center", opacity: lose ? 0.45 : 1 }}>
+  const PlayerBig = ({
+    name,
+    pool,
+    odds,
+    side,
+    win,
+    lose,
+  }: {
+    name: string | null;
+    pool: number;
+    odds: number | null;
+    side: "p1" | "p2";
+    win: boolean;
+    lose: boolean;
+  }) => (
+    <div style={{ flex: 1, textAlign: "center", opacity: lose ? 0.4 : 1, minWidth: 0 }}>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
         <Avatar name={name ?? "?"} size={54} />
       </div>
-      <div className="h-sec" style={{ fontSize: 15, lineHeight: 1.2 }}>
+      <div className="h-sec" style={{ fontSize: 15, lineHeight: 1.2, textDecoration: lose ? "line-through" : "none", overflowWrap: "anywhere" }}>
         {win && <span style={{ color: "var(--color-green)" }}>✓ </span>}
         {name ?? "TBD"}
       </div>
-      <div className="odds" style={{ fontSize: 20, marginTop: 6, color: win ? "var(--color-green)" : "var(--color-ink)" }}>
-        {oddsLabel(odds)}
+      <div style={{ marginTop: 8 }}>
+        <span
+          className={`oddsbox ${win ? "oddsbox-won" : side === "p1" ? "oddsbox-p1" : "oddsbox-p2"}`}
+          style={{ fontSize: 17, padding: "8px 12px" }}
+        >
+          {oddsLabel(odds)}
+        </span>
       </div>
-      <div className="eyebrow" style={{ marginTop: 2 }}>pool {fmt(pool)}</div>
+      <div className="eyebrow" style={{ marginTop: 8 }}>pool {fmt(pool)}</div>
     </div>
   );
 
   return (
     <div className="wrap rise" style={{ paddingTop: 12 }}>
       <AutoRefresh />
-      <Link href="/" className="eyebrow" style={{ display: "inline-block", marginBottom: 12 }}>← Lobby</Link>
+      <Link href="/" className="eyebrow eyebrow-bright" style={{ display: "inline-block", marginBottom: 12 }}>
+        ← lobby
+      </Link>
 
-      <div className="glass" style={{ padding: 18 }}>
+      <div className="glass" style={{ padding: 18, position: "relative", overflow: "hidden" }}>
+        <span className="watermark" aria-hidden>♞</span>
         <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
           <span className="eyebrow">{m.id} · {roundName(m.round)}</span>
-          <span className={`pill ${m.status === "open" ? "pill-live" : m.status === "locked" ? "pill-locked" : m.status === "settled" ? "pill-done" : "pill-soon"}`}>
-            {m.status === "open" ? "● Betting open" : m.status === "locked" ? "◐ In play" : m.status === "settled" ? "Final" : "Upcoming"}
+          <span
+            className={`pill ${
+              m.status === "open" ? "pill-live" : m.status === "locked" ? "pill-locked" : m.status === "settled" ? "pill-done" : "pill-soon"
+            }`}
+          >
+            {m.status === "open" ? (
+              <>
+                <span className="live-dot" /> betting open
+              </>
+            ) : m.status === "locked" ? (
+              "◐ in play"
+            ) : m.status === "settled" ? (
+              "final"
+            ) : (
+              "upcoming"
+            )}
           </span>
         </div>
 
         <div className="flex items-center" style={{ gap: 8 }}>
-          <PlayerBig name={m.p1_name} pool={m.pool_p1} odds={m.odds_p1} win={winP1} lose={winP2} />
-          <div style={{ fontFamily: "var(--font-display)", color: "var(--color-faint)", fontSize: 13, fontWeight: 600 }}>VS</div>
-          <PlayerBig name={m.p2_name} pool={m.pool_p2} odds={m.odds_p2} win={winP2} lose={winP1} />
+          <PlayerBig name={m.p1_name} pool={m.pool_p1} odds={m.odds_p1} side="p1" win={winP1} lose={winP2} />
+          <span className="vs-seal">VS</span>
+          <PlayerBig name={m.p2_name} pool={m.pool_p2} odds={m.odds_p2} side="p2" win={winP2} lose={winP1} />
         </div>
 
         <div className="meter" style={{ marginTop: 18 }}>
-          <span style={{ width: `${w1}%`, background: total ? "var(--color-purple)" : "rgba(255,255,255,0.08)" }} />
-          <span style={{ width: `${100 - w1}%`, background: total ? "var(--color-orange)" : "rgba(255,255,255,0.05)" }} />
+          {total > 0 ? (
+            <>
+              <span className="meter-p1" style={{ width: `${w1}%` }} />
+              <span className="meter-p2" style={{ width: `${100 - w1}%` }} />
+            </>
+          ) : (
+            <span className="meter-empty" style={{ width: "100%" }} />
+          )}
         </div>
-        <div className="eyebrow" style={{ marginTop: 8, textAlign: "center" }}>
-          {m.bet_count} bet{m.bet_count === 1 ? "" : "s"} · total pot {fmt(total)} 🪙 · {m.scheduled_label}
+        <div className="eyebrow" style={{ marginTop: 10, textAlign: "center" }}>
+          {m.bet_count} bet{m.bet_count === 1 ? "" : "s"} · total pot{" "}
+          <span style={{ color: "var(--color-gold)" }}>{fmt(total)}</span>
+          {m.scheduled_label ? ` · ${m.scheduled_label}` : ""}
         </div>
       </div>
 
+      {m.game_url && m.status !== "settled" && (
+        <a
+          href={m.game_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-ghost btn-block"
+          style={{ marginTop: 12, borderColor: "rgba(245,196,81,0.35)", color: "var(--color-gold)" }}
+        >
+          ♟ Watch this game live on chess.com ↗
+        </a>
+      )}
+
       {myBet && (
-        <div className="glass" style={{ marginTop: 12, padding: "10px 14px", fontSize: 13.5 }}>
-          Your bet: <b>{myBet.side === "p1" ? m.p1_name : m.p2_name}</b> for{" "}
-          <span className="num" style={{ color: "var(--color-gold)" }}>{fmt(myBet.amount)}</span>
+        <div className="glass" style={{ marginTop: 12, padding: "11px 14px", fontSize: 13.5 }}>
+          Your bet:{" "}
+          <b className={myBet.side === "p1" ? "side-p1" : "side-p2"}>
+            {myBet.side === "p1" ? m.p1_name : m.p2_name}
+          </b>{" "}
+          for <span className="num" style={{ color: "var(--color-gold)" }}>{fmt(myBet.amount)}</span>
         </div>
       )}
 
@@ -89,12 +148,14 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           />
         </div>
       ) : m.status === "locked" ? (
-        <div className="glass" style={{ marginTop: 14, padding: 14, textAlign: "center", color: "var(--color-orange)" }}>
-          Betting is locked — the match is being played. Payouts drop when it's called.
+        <div className="glass" style={{ marginTop: 14, padding: 14, textAlign: "center", color: "var(--color-orange)", fontSize: 14 }}>
+          Betting is locked — the match is being played. Payouts drop when it&apos;s called.
         </div>
       ) : m.status === "settled" ? (
-        <div className="glass" style={{ marginTop: 14, padding: 14, textAlign: "center" }}>
-          <span className="h-sec" style={{ color: "var(--color-green)" }}>{m.winner_name} wins.</span>
+        <div className="glass" style={{ marginTop: 14, padding: 16, textAlign: "center" }}>
+          <span className="h-sec" style={{ color: "var(--color-green)", fontSize: 16 }}>
+            {m.winner_name} wins.
+          </span>
           {myBet && (
             <div style={{ fontSize: 13, marginTop: 6, color: "var(--color-muted)" }}>
               {(myBet.side === "p1" ? winP1 : winP2)
@@ -119,8 +180,12 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
                   <Avatar name={b.name} size={26} />
                   <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{b.name}</span>
                 </div>
-                <div style={{ color: "var(--color-muted)", whiteSpace: "nowrap" }}>
-                  {fmt(b.amount)} on {(b.side === "p1" ? m.p1_name : m.p2_name) ?? b.side}
+                <div style={{ whiteSpace: "nowrap", fontSize: 13 }}>
+                  <span className="num" style={{ color: "var(--color-gold)" }}>{fmt(b.amount)}</span>{" "}
+                  <span style={{ color: "var(--color-faint)" }}>on</span>{" "}
+                  <span className={b.side === "p1" ? "side-p1" : "side-p2"}>
+                    {(b.side === "p1" ? m.p1_name : m.p2_name) ?? b.side}
+                  </span>
                 </div>
               </div>
             ))}

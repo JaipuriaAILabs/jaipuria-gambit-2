@@ -7,20 +7,40 @@ export default async function LoginPage() {
   if (user) redirect("/");
 
   return (
-    <div className="wrap rise" style={{ paddingTop: 48, paddingBottom: 40 }}>
-      <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div style={{ fontSize: 40, marginBottom: 8 }}>♞</div>
-        <h1 className="h-hero" style={{ fontSize: 34, marginBottom: 8 }}>
-          The Jaipuria <span style={{ color: "var(--color-purple)" }}>Gambit</span>
+    <div className="wrap rise" style={{ paddingTop: 52, paddingBottom: 40 }}>
+      <div style={{ textAlign: "center", marginBottom: 26 }}>
+        <div
+          className="glass"
+          style={{
+            width: 72,
+            height: 72,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 38,
+            marginBottom: 18,
+            borderColor: "rgba(155,109,255,0.3)",
+          }}
+        >
+          ♞
+        </div>
+        <div className="eyebrow" style={{ marginBottom: 10 }}>office chess championship · 16–17 jul</div>
+        <h1 className="h-hero" style={{ fontSize: 40, marginBottom: 12 }}>
+          The Jaipuria<br />
+          <span style={{ color: "var(--color-purple)" }}>Gambit</span>
         </h1>
-        <p style={{ color: "var(--color-muted)", fontSize: 15, maxWidth: 380, margin: "0 auto", lineHeight: 1.5 }}>
-          The office chess tournament, with skin in the game. Bet fake Gambits on every match,
-          read the crowd, and climb the board. No real money — just bragging rights.
+        <p style={{ color: "var(--color-muted)", fontSize: 14.5, maxWidth: 380, margin: "0 auto", lineHeight: 1.55 }}>
+          The office tournament, with skin in the game. Bet fake Gambits on every
+          match, read the crowd, climb the board. No real money — just bragging rights.
         </p>
       </div>
+
+      <div className="checker" style={{ marginBottom: 22 }} />
+
       <LoginForm />
-      <p style={{ textAlign: "center", fontSize: 11.5, color: "var(--color-faint)", marginTop: 18, fontFamily: "var(--font-mono)" }}>
-        20 players · 19 matches · one champion
+
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--color-faint)", marginTop: 18, fontFamily: "var(--font-mono)", letterSpacing: "0.14em" }}>
+        20 PLAYERS · 19 MATCHES · ONE CHAMPION
       </p>
     </div>
   );

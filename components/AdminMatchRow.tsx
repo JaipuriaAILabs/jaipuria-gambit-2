@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { adminSettle, adminSetStatus } from "@/app/actions";
+import { useActionState, useState } from "react";
+import { adminSettle, adminSetStatus, adminSetGameUrl, type FormState } from "@/app/actions";
 import { fmt } from "@/lib/format";
 
 type Props = {
@@ -14,12 +14,18 @@ type Props = {
   poolP1: number;
   poolP2: number;
   winnerName: string | null;
+  gameUrl: string | null;
 };
 
 export function AdminMatchRow(p: Props) {
   const [armed, setArmed] = useState<number | null>(null);
+  const [settleState, settleAction, settling] = useActionState<FormState, FormData>(adminSettle, {});
+  const [statusState, statusAction, statusPending] = useActionState<FormState, FormData>(adminSetStatus, {});
+  const [urlState, urlAction, urlPending] = useActionState<FormState, FormData>(adminSetGameUrl, {});
+
   const bothSet = p.p1Id != null && p.p2Id != null;
   const armedName = armed === p.p1Id ? p.p1Name : p.p2Name;
+  const err = settleState.error || statusState.error || urlState.error;
 
   return (
     <div className="glass" style={{ padding: 14 }}>
@@ -30,10 +36,34 @@ export function AdminMatchRow(p: Props) {
         </span>
       </div>
       <div style={{ fontSize: 14, marginBottom: 10 }}>
-        {p.p1Name ?? "TBD"} <span style={{ color: "var(--color-faint)" }}>({fmt(p.poolP1)})</span>
+        <span className="side-p1">{p.p1Name ?? "TBD"}</span>{" "}
+        <span style={{ color: "var(--color-faint)" }}>({fmt(p.poolP1)})</span>
         <span style={{ color: "var(--color-faint)" }}> vs </span>
-        {p.p2Name ?? "TBD"} <span style={{ color: "var(--color-faint)" }}>({fmt(p.poolP2)})</span>
+        <span className="side-p2">{p.p2Name ?? "TBD"}</span>{" "}
+        <span style={{ color: "var(--color-faint)" }}>({fmt(p.poolP2)})</span>
       </div>
+
+      {p.status !== "settled" && (
+        <form action={urlAction} className="flex" style={{ gap: 8, marginBottom: 10 }}>
+          <input type="hidden" name="matchId" value={p.id} />
+          <input
+            name="gameUrl"
+            className="input"
+            defaultValue={p.gameUrl ?? ""}
+            placeholder="chess.com game link (optional)"
+            style={{ padding: "8px 10px", fontSize: 13, flex: 1 }}
+          />
+          <button className="btn btn-ghost" style={{ padding: "8px 12px", fontSize: 12 }} type="submit" disabled={urlPending}>
+            {urlPending ? "…" : p.gameUrl ? "Update" : "Set"} link
+          </button>
+        </form>
+      )}
+
+      {err && (
+        <div style={{ fontSize: 12.5, color: "var(--color-red)", marginBottom: 8, fontFamily: "var(--font-mono)" }}>
+          {err}
+        </div>
+      )}
 
       {p.status === "settled" ? (
         <div style={{ color: "var(--color-green)", fontSize: 13, fontFamily: "var(--font-mono)" }}>
@@ -44,22 +74,21 @@ export function AdminMatchRow(p: Props) {
       ) : (
         <div className="flex flex-col" style={{ gap: 10 }}>
           <div className="flex" style={{ gap: 8 }}>
-            {p.status === "open" ? (
-              <form action={adminSetStatus}>
-                <input type="hidden" name="matchId" value={p.id} />
-                <input type="hidden" name="status" value="locked" />
-                <button className="btn btn-ghost" style={{ padding: "8px 12px", fontSize: 13 }} type="submit">Lock betting</button>
-              </form>
-            ) : (
-              <form action={adminSetStatus}>
-                <input type="hidden" name="matchId" value={p.id} />
-                <input type="hidden" name="status" value="open" />
-                <button className="btn btn-ghost" style={{ padding: "8px 12px", fontSize: 13 }} type="submit">Reopen betting</button>
-              </form>
-            )}
+            <form action={statusAction}>
+              <input type="hidden" name="matchId" value={p.id} />
+              <input type="hidden" name="status" value={p.status === "open" ? "locked" : "open"} />
+              <button className="btn btn-ghost" style={{ padding: "8px 12px", fontSize: 13 }} type="submit" disabled={statusPending}>
+                {statusPending ? "…" : p.status === "open" ? "Lock betting" : "Reopen betting"}
+              </button>
+            </form>
           </div>
 
-          <form action={adminSettle}>
+          {p.status === "open" ? (
+            <div style={{ color: "var(--color-faint)", fontSize: 12 }}>
+              Lock betting when the game starts — then you can declare the winner.
+            </div>
+          ) : (
+          <form action={settleAction}>
             <input type="hidden" name="matchId" value={p.id} />
             <input type="hidden" name="winnerId" value={armed ?? ""} />
             {armed == null ? (
@@ -76,15 +105,16 @@ export function AdminMatchRow(p: Props) {
               </div>
             ) : (
               <div className="flex flex-col" style={{ gap: 8 }}>
-                <button type="submit" className="btn btn-danger btn-block" style={{ fontSize: 13 }}>
-                  Confirm: {armedName} won → pay out now
+                <button type="submit" className="btn btn-danger btn-block" style={{ fontSize: 13 }} disabled={settling}>
+                  {settling ? "Settling…" : `Confirm: ${armedName} won → pay out now`}
                 </button>
-                <button type="button" className="btn btn-ghost btn-block" style={{ fontSize: 12, padding: "6px" }} onClick={() => setArmed(null)}>
+                <button type="button" className="btn btn-ghost btn-block" style={{ fontSize: 12, padding: "6px" }} onClick={() => setArmed(null)} disabled={settling}>
                   cancel
                 </button>
               </div>
             )}
           </form>
+          )}
         </div>
       )}
     </div>

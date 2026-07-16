@@ -27,6 +27,7 @@ export default async function AdminPage() {
       poolP1={m.pool_p1}
       poolP2={m.pool_p2}
       winnerName={m.winner_name}
+      gameUrl={m.game_url}
     />
   );
 

@@ -13,9 +13,10 @@ export function oddsLabel(mult: number | null): string {
 }
 
 export function initials(name: string): string {
+  // Array.from keeps emoji/astral characters intact (no split surrogate pairs).
   const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "?";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  const first = Array.from(parts[0] ?? "?")[0] ?? "?";
+  const last = parts.length > 1 ? (Array.from(parts[parts.length - 1])[0] ?? "") : "";
   return (first + last).toUpperCase();
 }
 

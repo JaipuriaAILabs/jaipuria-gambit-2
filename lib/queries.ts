@@ -8,6 +8,7 @@ export type MatchRow = {
   ord: number;
   status: "pending" | "open" | "locked" | "settled";
   scheduled_label: string | null;
+  game_url: string | null;
   p1_ref: string;
   p2_ref: string;
   p1_player_id: number | null;
@@ -33,6 +34,7 @@ function mapMatch(r: Record<string, unknown>): MatchRow {
     ord: n(r.ord),
     status: r.status as MatchRow["status"],
     scheduled_label: (r.scheduled_label as string) ?? null,
+    game_url: (r.game_url as string) ?? null,
     p1_ref: r.p1_ref as string,
     p2_ref: r.p2_ref as string,
     p1_player_id: r.p1_player_id == null ? null : n(r.p1_player_id),
@@ -50,7 +52,7 @@ function mapMatch(r: Record<string, unknown>): MatchRow {
 }
 
 const MATCH_SELECT = sql`
-  select m.id, m.round, m.ord, m.status, m.scheduled_label, m.p1_ref, m.p2_ref,
+  select m.id, m.round, m.ord, m.status, m.scheduled_label, m.game_url, m.p1_ref, m.p2_ref,
          m.p1_player_id, m.p2_player_id, m.winner_player_id,
          p1.name as p1_name, p2.name as p2_name, w.name as winner_name,
          coalesce((select sum(amount) from gambit.bets b where b.match_id=m.id and b.side='p1'),0) as pool_p1,
@@ -247,5 +249,66 @@ export async function getStats(): Promise<Stats> {
     players: n(ucount.v),
     hottest,
     peoplesChampion,
+  };
+}
+
+// ---------- Tournament player board (the people PLAYING chess) ----------
+export type PlayerBoardRow = {
+  player_id: number;
+  name: string;
+  eliminated: boolean;
+  is_champion: boolean;
+  wins: number;
+  played: number;
+  round_reached: number; // highest round they appear in
+  backing: number; // futures money riding on them
+};
+
+export async function getPlayerBoard(): Promise<PlayerBoardRow[]> {
+  const [state] = await sql`select champion_player_id from gambit.app_state where id=1`;
+  const champ = state?.champion_player_id == null ? null : n(state.champion_player_id);
+  const rows = await sql`
+    select p.id as player_id, p.name, p.eliminated,
+      (select count(*) from gambit.matches m where m.winner_player_id = p.id) as wins,
+      (select count(*) from gambit.matches m
+        where m.status='settled' and (m.p1_player_id=p.id or m.p2_player_id=p.id)) as played,
+      coalesce((select max(m.round) from gambit.matches m
+        where m.p1_player_id=p.id or m.p2_player_id=p.id), 1) as round_reached,
+      coalesce((select sum(f.amount) from gambit.futures_bets f where f.player_id=p.id), 0) as backing
+    from gambit.players p
+    order by wins desc, p.eliminated asc, backing desc, p.name asc`;
+  return rows.map((r) => ({
+    player_id: n(r.player_id),
+    name: r.name as string,
+    eliminated: r.eliminated as boolean,
+    is_champion: champ != null && n(r.player_id) === champ,
+    wins: n(r.wins),
+    played: n(r.played),
+    round_reached: n(r.round_reached),
+    backing: n(r.backing),
+  }));
+}
+
+// ---------- Leaderboard superlatives (bettor bragging rights) ----------
+export type Superlatives = {
+  biggestHit: { name: string; payout: number } | null; // largest single payout
+  mostActive: { name: string; bets: number } | null; // most bets placed
+  boldest: { name: string; amount: number } | null; // largest single stake
+};
+
+export async function getSuperlatives(): Promise<Superlatives> {
+  const hit = await sql`
+    select u.name, b.payout from gambit.bets b join gambit.users u on u.id=b.user_id
+    where b.payout > 0 order by b.payout desc limit 1`;
+  const active = await sql`
+    select u.name, count(*) as c from gambit.bets b join gambit.users u on u.id=b.user_id
+    group by u.name order by c desc limit 1`;
+  const bold = await sql`
+    select u.name, b.amount from gambit.bets b join gambit.users u on u.id=b.user_id
+    order by b.amount desc, b.created_at asc limit 1`;
+  return {
+    biggestHit: hit[0] ? { name: hit[0].name as string, payout: n(hit[0].payout) } : null,
+    mostActive: active[0] ? { name: active[0].name as string, bets: n(active[0].c) } : null,
+    boldest: bold[0] ? { name: bold[0].name as string, amount: n(bold[0].amount) } : null,
   };
 }

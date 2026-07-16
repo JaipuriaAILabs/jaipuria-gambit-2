@@ -5,7 +5,11 @@ import crypto from "crypto";
 import sql, { n } from "./db";
 
 const COOKIE = "gambit_session";
-const SECRET = process.env.SESSION_SECRET ?? "dev-secret-change-me";
+const SECRET: string =
+  process.env.SESSION_SECRET ??
+  (() => {
+    throw new Error("SESSION_SECRET is not set — refusing to run with a forgeable secret.");
+  })();
 
 // ---------- PIN hashing (scrypt, built-in crypto) ----------
 export function hashPin(pin: string): string {

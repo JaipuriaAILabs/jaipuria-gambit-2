@@ -12,17 +12,47 @@ export function FuturesForm({ players, balance }: { players: P[]; balance: numbe
   const router = useRouter();
   const [pid, setPid] = useState<number>(players[0]?.player_id ?? 0);
   const [amount, setAmount] = useState<number>(100);
+  const [placed, setPlaced] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
   const [state, action, pending] = useActionState<FormState, FormData>(placeFutures, {});
 
+  // If the selected player got knocked out (list refreshed), snap to a live one.
   useEffect(() => {
-    if (state.ok) router.refresh();
+    if (!players.some((p) => p.player_id === pid)) setPid(players[0]?.player_id ?? 0);
+  }, [players, pid]);
+
+  useEffect(() => {
+    if (state.ok) {
+      setPlaced(true);
+      router.refresh();
+      const t = setTimeout(() => setPlaced(false), 2500);
+      return () => clearTimeout(t);
+    }
   }, [state, router]);
 
   const sel = players.find((p) => p.player_id === pid);
-  const invalid = !pid || amount < MIN_BET || amount > balance;
+  const invalidReason = !pid
+    ? "Pick a player."
+    : !Number.isFinite(amount) || amount < MIN_BET
+      ? `Minimum stake is ${MIN_BET} Gambits.`
+      : amount > balance
+        ? `You only have ${fmt(balance)} Gambits.`
+        : null;
 
   return (
-    <form action={action} className="glass" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (invalidReason) {
+          e.preventDefault();
+          setHint(invalidReason);
+        } else {
+          setHint(null);
+        }
+      }}
+      className="glass"
+      style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}
+    >
       <input type="hidden" name="playerId" value={pid} />
       <div>
         <label className="eyebrow" htmlFor="pl">Back a champion</label>
@@ -43,32 +73,43 @@ export function FuturesForm({ players, balance }: { players: P[]; balance: numbe
       <div>
         <div className="flex items-center justify-between" style={{ marginBottom: 6 }}>
           <label className="eyebrow" htmlFor="famount">Stake</label>
-          <span style={{ fontSize: 11.5, color: "var(--color-faint)", fontFamily: "var(--font-mono)" }}>balance {fmt(balance)}</span>
+          <span style={{ fontSize: 11.5, color: "var(--color-faint)", fontFamily: "var(--font-mono)" }}>
+            balance <span style={{ color: "var(--color-gold)" }}>{fmt(balance)}</span>
+          </span>
         </div>
         <input
           id="famount"
           name="amount"
           className="input num"
           type="number"
+          inputMode="numeric"
           min={MIN_BET}
-          max={balance}
-          step={10}
+          step={1}
           value={Number.isFinite(amount) ? amount : ""}
-          onChange={(e) => setAmount(Math.floor(Number(e.target.value)))}
+          onChange={(e) => {
+            const v = e.target.value;
+            setAmount(v === "" ? NaN : Math.floor(Number(v)));
+            setHint(null);
+          }}
         />
         <div className="flex" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
           {[50, 100, 250].filter((c) => c <= balance).map((c) => (
-            <button key={c} type="button" className="pill" style={{ cursor: "pointer" }} onClick={() => setAmount(c)}>{c}</button>
+            <button key={c} type="button" className="chip" onClick={() => setAmount(c)}>{c}</button>
           ))}
         </div>
       </div>
       {sel && sel.odds && (
         <div style={{ fontSize: 12.5, color: "var(--color-muted)" }}>
-          Current odds on {sel.name}: <span className="odds" style={{ color: "var(--color-gold)" }}>{oddsLabel(sel.odds)}</span> — but they climb as others pile in and as rivals get knocked out.
+          Current odds on {sel.name}: <span className="odds" style={{ color: "var(--color-gold)" }}>{oddsLabel(sel.odds)}</span> — they climb as others pile in and rivals get knocked out.
         </div>
       )}
-      {state.error && <div style={{ fontSize: 13, color: "var(--color-red)" }}>{state.error}</div>}
-      <button className="btn btn-primary btn-block" type="submit" disabled={pending || invalid}>
+      {(hint || state.error) && <div style={{ fontSize: 13, color: "var(--color-red)" }}>{hint ?? state.error}</div>}
+      {placed && !state.error && !hint && (
+        <div style={{ fontSize: 13, color: "var(--color-green)", fontFamily: "var(--font-mono)" }}>
+          ✓ Futures bet placed{sel ? ` on ${sel.name}` : ""}.
+        </div>
+      )}
+      <button className="btn btn-primary btn-block" type="submit" disabled={pending}>
         {pending ? "Placing…" : "Bet on the champion ♛"}
       </button>
     </form>
