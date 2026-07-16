@@ -21,7 +21,7 @@ export function BetForm(props: Props) {
   const { matchId, p1Name, p2Name, poolP1, poolP2, balance, currentSide, currentAmount } = props;
   const router = useRouter();
   const [side, setSide] = useState<"p1" | "p2" | null>(currentSide);
-  const [amount, setAmount] = useState<number>(currentAmount || 100);
+  const [amount, setAmount] = useState<number>(currentAmount || 5000);
   const [placed, setPlaced] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const [state, action, pending] = useActionState<FormState, FormData>(placeBet, {});
@@ -53,11 +53,11 @@ export function BetForm(props: Props) {
     return { payout: Math.floor(amount * mult), mult };
   }, [side, amount, poolP1, poolP2, currentSide, currentAmount]);
 
-  const chips = [50, 100, 250, 500].filter((c) => c <= maxBet);
+  const chips = [1000, 5000, 10000, 25000].filter((c) => c <= maxBet);
   const invalidReason = !side
     ? "Pick a player to back first."
     : !Number.isFinite(amount) || amount < MIN_BET
-      ? `Minimum stake is ${MIN_BET} Gambits.`
+      ? `Minimum stake is ${MIN_BET} J-Coins.`
       : amount > maxBet
         ? `Max you can stake here is ${fmt(maxBet)}.`
         : null;
@@ -148,7 +148,7 @@ export function BetForm(props: Props) {
         <div className="flex" style={{ gap: 8, marginTop: 9, flexWrap: "wrap" }}>
           {chips.map((c) => (
             <button key={c} type="button" className="chip" onClick={() => setAmount(c)}>
-              {c}
+              {fmt(c)}
             </button>
           ))}
           {maxBet >= MIN_BET && (

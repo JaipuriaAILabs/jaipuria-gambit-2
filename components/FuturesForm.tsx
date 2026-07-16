@@ -11,7 +11,7 @@ type P = { player_id: number; name: string; odds: number | null };
 export function FuturesForm({ players, balance }: { players: P[]; balance: number }) {
   const router = useRouter();
   const [pid, setPid] = useState<number>(players[0]?.player_id ?? 0);
-  const [amount, setAmount] = useState<number>(100);
+  const [amount, setAmount] = useState<number>(5000);
   const [placed, setPlaced] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const [state, action, pending] = useActionState<FormState, FormData>(placeFutures, {});
@@ -34,9 +34,9 @@ export function FuturesForm({ players, balance }: { players: P[]; balance: numbe
   const invalidReason = !pid
     ? "Pick a player."
     : !Number.isFinite(amount) || amount < MIN_BET
-      ? `Minimum stake is ${MIN_BET} Gambits.`
+      ? `Minimum stake is ${MIN_BET} J-Coins.`
       : amount > balance
-        ? `You only have ${fmt(balance)} Gambits.`
+        ? `You only have ${fmt(balance)} J-Coins.`
         : null;
 
   return (
@@ -93,8 +93,8 @@ export function FuturesForm({ players, balance }: { players: P[]; balance: numbe
           }}
         />
         <div className="flex" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-          {[50, 100, 250].filter((c) => c <= balance).map((c) => (
-            <button key={c} type="button" className="chip" onClick={() => setAmount(c)}>{c}</button>
+          {[1000, 5000, 10000].filter((c) => c <= balance).map((c) => (
+            <button key={c} type="button" className="chip" onClick={() => setAmount(c)}>{fmt(c)}</button>
           ))}
         </div>
       </div>

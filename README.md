@@ -1,6 +1,6 @@
 # ♞ The Jaipuria Gambit
 
-A fake-money betting app for an office chess tournament. Bet **Gambits** (play money) on live matches, watch the crowd move the odds, back a champion early, and climb the leaderboard. Built in one afternoon for the Seth M.R. Jaipuria Schools internal 20-player bracket.
+A fake-money betting app for an office chess tournament. Bet **J-Coins** (play money) on live matches, watch the crowd move the odds, back a champion early, and climb the leaderboard. Built in one afternoon for the Seth M.R. Jaipuria Schools internal 20-player bracket.
 
 **Live:** https://jaipuria-gambit.vercel.app
 
@@ -9,7 +9,7 @@ A fake-money betting app for an office chess tournament. Bet **Gambits** (play m
 - **Pari-mutuel odds.** No house, no bookie. Everyone's bets go into a pool and the crowd sets the odds live — back the underdog and a small stake can scoop the whole pot. Self-balancing and fair (if nobody backs the winner, everyone's refunded).
 - **Champion futures.** A separate pool to bet who lifts the trophy. Money on knocked-out players stays in the pot as dead money, so early gutsy calls pay the fattest.
 - **Auto-advancing bracket.** Later matches are stored as references (`winner:M2`). When an admin declares a result, the winner flows into the next round automatically, the loser is eliminated, and payouts settle in one transaction. No spreadsheets.
-- **Claim-your-name auth.** Name + a PIN, everyone starts with 1,000 Gambits. Zero-friction for a same-day office launch (scrypt-hashed PIN + a signed session cookie).
+- **Claim-your-name auth.** Name + a PIN, everyone starts with 1,00,000 J-Coins. Zero-friction for a same-day office launch (scrypt-hashed PIN + a signed session cookie).
 - **Live everything.** Moving odds, an activity ticker ("⚡ UPSET — …"), a leaderboard with chess-rank titles, all polled in near-real-time.
 
 ## Stack

@@ -99,5 +99,5 @@ export function computeFuturesPayouts(bets: BetLike[], championPlayerId: number)
   return { total, winStake, refundAll: false, results };
 }
 
-export const STARTING_BALANCE = 1000;
-export const MIN_BET = 10;
+export const STARTING_BALANCE = 100000;
+export const MIN_BET = 100;

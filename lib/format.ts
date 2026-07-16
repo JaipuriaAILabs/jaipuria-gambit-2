@@ -1,6 +1,6 @@
 // Pure display helpers — safe in both server and client components.
 
-export const CURRENCY = "Gambits";
+export const CURRENCY = "J-Coins";
 
 export function fmt(n: number | string | null | undefined): string {
   const v = Number(n ?? 0);
@@ -30,14 +30,14 @@ export function avatarStyle(name: string): { background: string; color: string }
   };
 }
 
-// Chess-flavoured rank title by wallet size.
+// Chess-flavoured rank title by wallet size (calibrated to the 100k start).
 export function rankTitle(balance: number): string {
-  if (balance >= 3000) return "Grandmaster";
-  if (balance >= 2000) return "Int'l Master";
-  if (balance >= 1400) return "FIDE Master";
-  if (balance >= 1000) return "Candidate Master";
-  if (balance >= 500) return "Club Player";
-  if (balance >= 100) return "Pawn Pusher";
+  if (balance >= 300000) return "Grandmaster";
+  if (balance >= 200000) return "Int'l Master";
+  if (balance >= 140000) return "FIDE Master";
+  if (balance >= 100000) return "Candidate Master";
+  if (balance >= 50000) return "Club Player";
+  if (balance >= 10000) return "Pawn Pusher";
   if (balance > 0) return "On tilt";
   return "Blundered it all";
 }

@@ -31,7 +31,7 @@ export default async function LeaderboardPage() {
         <div className="eyebrow" style={{ marginBottom: 6 }}>standings</div>
         <h1 className="h-hero" style={{ fontSize: 28 }}>The Board</h1>
         <p style={{ color: "var(--color-muted)", fontSize: 13.5, marginTop: 6 }}>
-          Punters started with 1,000 Gambits each. Players fight for the bracket.
+          Punters started with 1,00,000 J-Coins each. Players fight for the bracket.
         </p>
       </div>
 

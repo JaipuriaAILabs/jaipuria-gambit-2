@@ -8,7 +8,9 @@ import {
   computeMatchPayouts,
   computeFuturesPayouts,
   MIN_BET,
+  STARTING_BALANCE,
 } from "@/lib/parimutuel";
+import { CURRENCY } from "@/lib/format";
 
 export type FormState = { error?: string; ok?: boolean };
 
@@ -54,13 +56,13 @@ export async function claimIdentity(_prev: FormState, formData: FormData): Promi
     } else {
       // on conflict guards the two-people-same-name-simultaneously race
       const inserted = await sql`
-        insert into gambit.users (name, name_lower, pin_hash)
-        values (${name}, ${nameLower}, ${hashPin(pin)})
+        insert into gambit.users (name, name_lower, pin_hash, balance)
+        values (${name}, ${nameLower}, ${hashPin(pin)}, ${STARTING_BALANCE})
         on conflict (name_lower) do nothing returning id`;
       if (!inserted[0]) return { error: "That name just got claimed — try again." };
       userId = n(inserted[0].id);
       await sql`insert into gambit.activity (kind, text)
-                values ('join', ${`${name} joined the table with 1,000 Gambits 🎲`})`;
+                values ('join', ${`${name} joined the table with ${STARTING_BALANCE.toLocaleString("en-IN")} ${CURRENCY} 🎲`})`;
     }
   } catch {
     return { error: "Hiccup at the table — try again." };
@@ -85,7 +87,7 @@ export async function placeBet(_prev: FormState, formData: FormData): Promise<Fo
   const amount = Math.floor(Number(formData.get("amount")));
 
   if (side !== "p1" && side !== "p2") return { error: "Pick a player to back." };
-  if (!Number.isFinite(amount) || amount < MIN_BET) return { error: `Minimum bet is ${MIN_BET} Gambits.` };
+  if (!Number.isFinite(amount) || amount < MIN_BET) return { error: `Minimum bet is ${MIN_BET} J-Coins.` };
 
   try {
     await sql.begin(async (tx) => {
@@ -106,7 +108,7 @@ export async function placeBet(_prev: FormState, formData: FormData): Promise<Fo
       const delta = amount - old;
 
       const [u] = await tx`select balance from gambit.users where id=${user.id} for update`;
-      if (n(u.balance) - delta < 0) throw new Error("Not enough Gambits for that.");
+      if (n(u.balance) - delta < 0) throw new Error("Not enough J-Coins for that.");
 
       await tx`update gambit.users set balance = balance - ${delta} where id=${user.id}`;
       await tx`
@@ -136,7 +138,7 @@ export async function placeFutures(_prev: FormState, formData: FormData): Promis
   const playerId = Math.floor(Number(formData.get("playerId")));
   const amount = Math.floor(Number(formData.get("amount")));
   if (!Number.isInteger(playerId)) return { error: "Pick a player." };
-  if (!Number.isFinite(amount) || amount < MIN_BET) return { error: `Minimum bet is ${MIN_BET} Gambits.` };
+  if (!Number.isFinite(amount) || amount < MIN_BET) return { error: `Minimum bet is ${MIN_BET} J-Coins.` };
 
   try {
     await sql.begin(async (tx) => {
@@ -153,7 +155,7 @@ export async function placeFutures(_prev: FormState, formData: FormData): Promis
       if (inPlay) throw new Error(`${p.name} is mid-game right now — futures reopen when it's called.`);
 
       const [u] = await tx`select balance from gambit.users where id=${user.id} for update`;
-      if (n(u.balance) - amount < 0) throw new Error("Not enough Gambits for that.");
+      if (n(u.balance) - amount < 0) throw new Error("Not enough J-Coins for that.");
 
       await tx`update gambit.users set balance = balance - ${amount} where id=${user.id}`;
       await tx`insert into gambit.futures_bets (user_id, player_id, amount)

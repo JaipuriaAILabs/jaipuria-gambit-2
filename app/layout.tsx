@@ -11,7 +11,7 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "The Jaipuria Gambit",
-  description: "Office chess tournament — bet Gambits, top the board.",
+  description: "Office chess tournament — bet J-Coins, top the board.",
 };
 
 export const viewport: Viewport = {

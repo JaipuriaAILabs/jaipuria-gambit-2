@@ -71,7 +71,7 @@ export default async function Lobby() {
       <div className="checker" style={{ marginBottom: 16 }} />
 
       <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(2, 1fr)" }}>
-        <Stat label="Gambits in play" value={`${fmt(stats.inPlay)}`} accent="var(--color-gold)" />
+        <Stat label="J-Coins in play" value={`${fmt(stats.inPlay)}`} accent="var(--color-gold)" />
         <Stat label="Punters" value={`${stats.players}`} />
         <Stat label="Hottest pot" value={stats.hottest ? `${stats.hottest.label} · ${fmt(stats.hottest.pool)}` : "—"} accent="var(--color-orange)" />
         <Stat label="Crowd favourite" value={stats.peoplesChampion ? stats.peoplesChampion.name : "wide open"} accent="var(--color-purple)" />

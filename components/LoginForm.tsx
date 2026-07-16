@@ -30,7 +30,7 @@ export function LoginForm() {
         required
       />
       <p style={{ fontSize: 12, color: "var(--color-faint)", margin: "2px 0 4px" }}>
-        New name → new account with 1,000 Gambits. Existing name → same PIN logs you back in.
+        New name → new account with 1,00,000 J-Coins. Existing name → same PIN logs you back in.
       </p>
       {state.error && (
         <div

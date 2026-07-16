@@ -30,7 +30,7 @@ export default async function LoginPage() {
           <span style={{ color: "var(--color-purple)" }}>Gambit</span>
         </h1>
         <p style={{ color: "var(--color-muted)", fontSize: 14.5, maxWidth: 380, margin: "0 auto", lineHeight: 1.55 }}>
-          The office tournament, with skin in the game. Bet fake Gambits on every
+          The office tournament, with skin in the game. Bet fake J-Coins on every
           match, read the crowd, climb the board. No real money — just bragging rights.
         </p>
       </div>
