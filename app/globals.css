@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* ===================== The Jaipuria Gambit — design system ===================== */
+/* Dark chess-parlour: near-black, dotted-grid signature, grain, glass, gold money. */
+
+@theme {
+  --font-display: var(--font-display), "Space Grotesk", system-ui, sans-serif;
+  --font-body: var(--font-body), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  --color-bg: #08080b;
+  --color-bg2: #0e0e14;
+  --color-ink: #ECECF1;
+  --color-muted: #9a9aab;
+  --color-faint: #63636f;
+  --color-purple: #9b6dff;
+  --color-purpledeep: #542864;
+  --color-orange: #ef7f1a;
+  --color-gold: #f5c451;
+  --color-green: #35d29a;
+  --color-red: #f45b69;
+  --color-line: rgba(255, 255, 255, 0.09);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body { padding: 0; margin: 0; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Atmospheric backdrop layers (fixed) */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(900px 600px at 15% -10%, rgba(155, 109, 255, 0.18), transparent 60%),
+    radial-gradient(800px 500px at 90% 0%, rgba(239, 127, 26, 0.10), transparent 55%),
+    radial-gradient(1000px 800px at 50% 120%, rgba(84, 40, 100, 0.22), transparent 60%),
+    var(--color-bg);
+}
+/* Dotted-grid signature */
+.dotgrid {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 30%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 30%, #000 55%, transparent 100%);
+  opacity: 0.7;
+  pointer-events: none;
+}
+/* Grain */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Typography ---------- */
+.font-display { font-family: var(--font-display); }
+.h-hero { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.03em; line-height: 0.95; }
+.h-sec { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.eyebrow { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.66rem; color: var(--color-faint); }
+
+/* ---------- Glass / cards ---------- */
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.card { border-radius: 18px; }
+.card-hover { transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease; }
+.card-hover:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.18); }
+.hairline { border-top: 1px solid var(--color-line); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em;
+  border-radius: 12px; padding: 0.72rem 1.1rem; font-size: 0.95rem;
+  border: 1px solid transparent; cursor: pointer; transition: all 0.16s ease;
+  user-select: none; text-decoration: none; line-height: 1;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary {
+  color: #150a1e;
+  background: linear-gradient(180deg, #b892ff, #9b6dff);
+  box-shadow: 0 6px 24px -8px rgba(155, 109, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-gold {
+  color: #1c1405;
+  background: linear-gradient(180deg, #ffd97a, #f5c451);
+  box-shadow: 0 6px 24px -8px rgba(245, 196, 81, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.btn-gold:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-ghost { color: var(--color-ink); background: rgba(255, 255, 255, 0.05); border-color: var(--color-line); }
+.btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+.btn-danger { color: #fff; background: linear-gradient(180deg, #ff6b78, #e0424f); }
+.btn-block { width: 100%; }
+
+/* ---------- Pills / chips ---------- */
+.pill {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.02em;
+  padding: 0.22rem 0.55rem; border-radius: 999px;
+  border: 1px solid var(--color-line); background: rgba(255, 255, 255, 0.04); color: var(--color-muted);
+}
+.pill-live { color: var(--color-green); border-color: rgba(53, 210, 154, 0.4); background: rgba(53, 210, 154, 0.08); }
+.pill-locked { color: var(--color-orange); border-color: rgba(239, 127, 26, 0.4); background: rgba(239, 127, 26, 0.08); }
+.pill-done { color: var(--color-faint); }
+.pill-soon { color: var(--color-purple); border-color: rgba(155, 109, 255, 0.35); background: rgba(155, 109, 255, 0.08); }
+
+/* odds display */
+.odds { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- Inputs ---------- */
+.input {
+  width: 100%; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--color-line);
+  border-radius: 12px; padding: 0.8rem 0.95rem; color: var(--color-ink);
+  font-family: var(--font-body); font-size: 1rem; outline: none; transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--color-purple); box-shadow: 0 0 0 3px rgba(155, 109, 255, 0.15); }
+.input::placeholder { color: var(--color-faint); }
+
+/* ---------- Layout helpers ---------- */
+.wrap { width: 100%; max-width: 680px; margin: 0 auto; padding: 0 16px; }
+.wrap-wide { width: 100%; max-width: 940px; margin: 0 auto; padding: 0 16px; }
+
+/* meter bar for pool split */
+.meter { height: 8px; border-radius: 999px; overflow: hidden; background: rgba(255, 255, 255, 0.06); display: flex; }
+.meter > span { display: block; height: 100%; }
+
+/* subtle marquee for activity ticker */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { display: inline-flex; white-space: nowrap; animation: marquee 34s linear infinite; }
+.marquee:hover { animation-play-state: paused; }
+
+/* fade-in */
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise 0.35s ease both; }
+
+a { color: inherit; }
