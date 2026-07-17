@@ -225,6 +225,36 @@ export async function adminSetGameUrl(_prev: FormState, formData: FormData): Pro
   return { ok: true };
 }
 
+// ---------------- Admin: record the lucky-draw result for the 3-man finale ----------------
+export async function adminFinaleDraw(_prev: FormState, formData: FormData): Promise<FormState> {
+  const admin = await getSessionUser();
+  if (!admin?.is_admin) return { error: "Not authorised." };
+  const byeId = Math.floor(Number(formData.get("byeId")));
+
+  try {
+    await sql.begin(async (tx) => {
+      const [m18] = await tx`select status, p1_player_id from gambit.matches where id='M18' for update`;
+      if (!m18 || m18.status !== "pending" || m18.p1_player_id != null)
+        throw new Error("The draw is already recorded.");
+      const alive = await tx`select id, name from gambit.players where eliminated=false order by id`;
+      if (alive.length !== 3) throw new Error("Need exactly 3 finalists for the draw.");
+      const bye = alive.find((p) => n(p.id) === byeId);
+      if (!bye) throw new Error("Pick one of the three finalists.");
+      const [s1, s2] = alive.filter((p) => n(p.id) !== byeId);
+
+      await tx`update gambit.matches set p1_player_id=${n(s1.id)}, p2_player_id=${n(s2.id)}, status='open' where id='M18'`;
+      await tx`update gambit.matches set p2_player_id=${byeId} where id='M19'`;
+      await tx`insert into gambit.activity (kind, text) values
+        ('upset', ${`🎩 THE DRAW IS IN — ${bye.name} walks straight into the final! ${s1.name} vs ${s2.name} fight the semifinal. Betting is OPEN.`})`;
+    });
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+  revalidateEverywhere("M18");
+  revalidatePath("/match/M19");
+  return { ok: true };
+}
+
 // ---------------- Admin: settle a match (payouts + bracket advance) ----------------
 export async function adminSettle(_prev: FormState, formData: FormData): Promise<FormState> {
   const admin = await getSessionUser();

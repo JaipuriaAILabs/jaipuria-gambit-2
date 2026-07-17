@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth";
 import { getMatches, getFutures } from "@/lib/queries";
 import { adminToggleFutures } from "@/app/actions";
 import { AdminMatchRow } from "@/components/AdminMatchRow";
+import { FinaleDraw } from "@/components/FinaleDraw";
 import { roundName } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,11 @@ export default async function AdminPage() {
   await requireAdmin();
   const matches = await getMatches();
   const futures = await getFutures();
+
+  // Lucky-draw panel: shown while M18 awaits its players and exactly 3 are alive.
+  const m18 = matches.find((m) => m.id === "M18");
+  const finalists = futures.players.filter((p) => !p.eliminated).map((p) => ({ id: p.player_id, name: p.name }));
+  const drawPending = m18?.status === "pending" && m18.p1_player_id == null && finalists.length === 3;
 
   const active = matches.filter((m) => m.status === "open" || m.status === "locked");
   const pending = matches.filter((m) => m.status === "pending");
@@ -40,6 +46,8 @@ export default async function AdminPage() {
           bracket advance automatically. Settlement can&apos;t be undone.
         </p>
       </div>
+
+      {drawPending && <FinaleDraw finalists={finalists} />}
 
       <div className="glass" style={{ padding: 14, marginBottom: 18, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
