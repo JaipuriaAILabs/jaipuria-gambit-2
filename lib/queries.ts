@@ -90,8 +90,9 @@ export async function getMatchBets(id: string): Promise<RecentBet[]> {
 
 export type LeaderRow = { id: number; name: string; balance: number; is_admin: boolean };
 export async function getLeaderboard(): Promise<LeaderRow[]> {
+  // Admins run the house — they don't appear on the punter board.
   const rows = await sql`
-    select id, name, balance, is_admin from gambit.users order by balance desc, id asc`;
+    select id, name, balance, is_admin from gambit.users where is_admin=false order by balance desc, id asc`;
   return rows.map((r) => ({
     id: n(r.id),
     name: r.name as string,
@@ -226,7 +227,7 @@ export async function getStats(): Promise<Stats> {
   // Serial, not Promise.all: concurrent queries on the pooler stall from serverless.
   const [live] = await sql`select coalesce(sum(amount),0) as v from gambit.bets where status='open'`;
   const [fut] = await sql`select coalesce(sum(amount),0) as v from gambit.futures_bets where status='open'`;
-  const [ucount] = await sql`select count(*) as v from gambit.users`;
+  const [ucount] = await sql`select count(*) as v from gambit.users where is_admin=false`;
   const hottestRows = await sql`
       select m.id,
         coalesce((select sum(amount) from gambit.bets b where b.match_id=m.id),0) as pool
@@ -299,13 +300,13 @@ export type Superlatives = {
 export async function getSuperlatives(): Promise<Superlatives> {
   const hit = await sql`
     select u.name, b.payout from gambit.bets b join gambit.users u on u.id=b.user_id
-    where b.payout > 0 order by b.payout desc limit 1`;
+    where b.payout > 0 and u.is_admin=false order by b.payout desc limit 1`;
   const active = await sql`
     select u.name, count(*) as c from gambit.bets b join gambit.users u on u.id=b.user_id
-    group by u.name order by c desc limit 1`;
+    where u.is_admin=false group by u.name order by c desc limit 1`;
   const bold = await sql`
     select u.name, b.amount from gambit.bets b join gambit.users u on u.id=b.user_id
-    order by b.amount desc, b.created_at asc limit 1`;
+    where u.is_admin=false order by b.amount desc, b.created_at asc limit 1`;
   return {
     biggestHit: hit[0] ? { name: hit[0].name as string, payout: n(hit[0].payout) } : null,
     mostActive: active[0] ? { name: active[0].name as string, bets: n(active[0].c) } : null,
